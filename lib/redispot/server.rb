@@ -53,7 +53,7 @@ module Redispot
       start(&block) if block
     end
 
-    # Start redis-server instance.
+    # Start redis-server instance within a given block.
     #
     # @example
     #   redis_server = Redispot::Server.new
@@ -74,36 +74,38 @@ module Redispot
 
     private
     def start_redis_server
-      File.open(logfile, 'w') do |logfh|
-        @pid = Process.fork do
+      @pid = fork_process
+
+      Timeout.timeout(@timeout) do
+        loop do
+          if !Process.waitpid(@pid, Process::WNOHANG).nil?
+            @pid = nil
+            raise RuntimeError, "failed to launch redis-server\n#{File.read(logfile)}"
+          else
+            if File.read(logfile) =~ /The server is now ready to accept connections/
+              ObjectSpace.define_finalizer(self, proc { stop })
+              return connect_info
+            end
+          end
+
+          sleep 0.1
+        end
+      end
+    rescue Timeout::Error
+      stop if @pid
+      raise RuntimeError, "failed to launch redis-server\n#{File.read(logfile)}"
+    end
+
+    def fork_process
+      File.open(logfile, 'w') do |fh|
+        Process.fork do
           begin
-            exec @executable, config_file, out: logfh, err: logfh
+            exec @executable, config_file, out: fh, err: fh
           rescue => error
             $stderr.puts "exec failed: #{error}"
             exit error.errno
           end
         end
-      end
-
-      begin
-        Timeout.timeout(@timeout) do
-          loop do
-            if !Process.waitpid(@pid, Process::WNOHANG).nil?
-              @pid = nil
-              raise RuntimeError, "failed to launch redis-server\n#{File.read(logfile)}"
-            else
-              if File.read(logfile) =~ /The server is now ready to accept connections/
-                ObjectSpace.define_finalizer(self, proc { stop })
-                return connect_info
-              end
-            end
-
-            sleep 0.1
-          end
-        end
-      rescue Timeout::Error
-        stop if @pid
-        raise RuntimeError, "failed to launch redis-server\n#{File.read(logfile)}"
       end
     end
 

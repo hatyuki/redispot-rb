@@ -1,5 +1,4 @@
 # Redispot
-
 [![Gem Version](https://badge.fury.io/rb/redispot.svg)](http://badge.fury.io/rb/redispot)
 [![Build Status](https://travis-ci.org/hatyuki/redispot-rb.svg?branch=master)](https://travis-ci.org/hatyuki/redispot-rb)
 [![Code Climate](https://codeclimate.com/github/hatyuki/redispot-rb/badges/gpa.svg)](https://codeclimate.com/github/hatyuki/redispot-rb)
