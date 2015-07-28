@@ -1,6 +1,8 @@
 /.bundle/
+/.direnv/
 /.yardoc/
 /Gemfile.lock
+/coverage/
 /doc/
 /pkg/
 /vendor/

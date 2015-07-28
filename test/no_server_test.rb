@@ -5,6 +5,6 @@ class Test::NoServerTest < Test::Unit::TestCase
     server = Redispot::Server.new
     server.instance_eval { @executable = 'does_not_exist' }
 
-    assert_raise(RuntimeError) { server.start { } }
+    assert_raise(RuntimeError) { server.start }
   end
 end

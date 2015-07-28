@@ -12,4 +12,12 @@ class Test::ManualStartTest < Test::Unit::TestCase
 
     assert_raise(Errno::ENOENT) { redis.ping }
   end
+
+  test 'manually start-stop the redis-server' do
+    server = Redispot::Server.new
+    redis  = Redis.new(server.start)
+    assert_equal('PONG', redis.ping)
+    server.stop
+    assert_raise(Errno::ENOENT) { redis.ping }
+  end
 end

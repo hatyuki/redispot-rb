@@ -20,7 +20,7 @@ class Test::BasicTest < Test::Unit::TestCase
     config = { bind: '127.0.0.1', port: empty_port }
 
     Redispot::Server.new(config: config) do |connect_info|
-      assert_equal("redis://127.0.0.1:#{config[:port]}/", connect_info[:url])
+      assert_equal("redis://#{config[:bind]}:#{config[:port]}/", connect_info[:url])
       assert_nil(connect_info[:path])
 
       redis = Redis.new(connect_info)

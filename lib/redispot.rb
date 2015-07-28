@@ -1,2 +1,4 @@
+require 'redispot/refinements'
 require 'redispot/server'
-require 'redispot/version.rb'
+require 'redispot/working_directory'
+require 'redispot/version'

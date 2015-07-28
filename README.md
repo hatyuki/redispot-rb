@@ -2,9 +2,11 @@
 [![Gem Version](https://badge.fury.io/rb/redispot.svg)](http://badge.fury.io/rb/redispot)
 [![Build Status](https://travis-ci.org/hatyuki/redispot-rb.svg?branch=master)](https://travis-ci.org/hatyuki/redispot-rb)
 [![Code Climate](https://codeclimate.com/github/hatyuki/redispot-rb/badges/gpa.svg)](https://codeclimate.com/github/hatyuki/redispot-rb)
+[![Test Coverage](https://codeclimate.com/github/hatyuki/redispot-rb/badges/coverage.svg)](https://codeclimate.com/github/hatyuki/redispot-rb/coverage)
 
-Launching the redis-server instance which is available only within a block.
+Launching the redis-server instance which is available only within a scope.
 It is useful when you want to test your code.
+
 It is a Ruby clone of [Test::RedisServer](https://github.com/typester/Test-RedisServer).
 
 
@@ -13,10 +15,22 @@ It is a Ruby clone of [Test::RedisServer](https://github.com/typester/Test-Redis
 require 'redis'
 require 'redispot'
 
+# Using redis-server instance within a block
+redis = nil
 Redispot::Server.new do |connect_info|
   redis = Redis.new(connect_info)
   redis.ping  # => "PONG"
 end
+
+redis.ping  # => Error!
+
+# or start it manually
+
+redispot = Redispot::Server.new
+redis    = Redis.new(redispot.start)
+redis.ping  # => "PONG"
+redispot.stop
+redis.ping  # => Error!
 ```
 
 
@@ -25,7 +39,7 @@ end
 Create a new instance, and start redis-server if block given.
 
 ```ruby
-redis_server = Redispot::Server.new(options)
+redispot = Redispot::Server.new(options)
 
 # or
 
@@ -72,11 +86,35 @@ Available options are:
 Start redis-server instance manually.
 
 ```ruby
-server = Redispot::Server.new
-server.start do |connect_info|
+redispot = Redispot::Server.new
+
+redispot.start do |connect_info|
   redis = Redis.new(connect_info)
   redis.ping  # => "PONG"
 end
+
+# or
+
+redis = Redis.new(redispot.start)
+# ... do anything
+redispot.stop
+```
+
+
+### Redispot::Server#stop
+Stop redis-server instance.
+
+This method is automatically called from object destructor.
+
+
+### Redispot::Server#connect_info
+Return connection info for client library to connect this redis-server instance.
+
+This parameter is designed to pass directly to Redis module.
+
+```ruby
+redispot = Redispot::Server.new
+redis    = Redis.new(redispot.connect_info)
 ```
 
 
