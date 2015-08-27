@@ -66,8 +66,11 @@ module Redispot
       start_process
 
       if block_given?
-        yield connect_info
-        stop
+        begin
+          yield connect_info
+        ensure
+          stop
+        end
       else
         connect_info
       end

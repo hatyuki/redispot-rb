@@ -26,10 +26,14 @@ redis.ping  # => Error!
 
 # or start it manually
 
-redispot = Redispot::Server.new
-redis    = Redis.new(redispot.start)
-redis.ping  # => "PONG"
-redispot.stop
+redispot     = Redispot::Server.new
+connect_info = redispot.start
+begin
+  redis = Redis.new(connect_info)
+  redis.ping  # => "PONG"
+ensure
+  redispot.stop
+end
 redis.ping  # => Error!
 ```
 
@@ -95,9 +99,13 @@ end
 
 # or
 
-redis = Redis.new(redispot.start)
-# ... do anything
-redispot.stop
+connect_info = redispot.start
+begin
+  redis = Redis.new(connect_info)
+  # ... do anything
+ensure
+  redispot.stop
+end
 ```
 
 
